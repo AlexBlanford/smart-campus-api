@@ -1,2 +1,4 @@
-com\smartcampus\Main.class
+com\smartcampus\model\Room.class
 com\smartcampus\resource\DiscoveryResource.class
+com\smartcampus\resource\RoomResource.class
+com\smartcampus\Main.class
