@@ -1,4 +1,6 @@
 X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\Main.java
 X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\model\Room.java
+X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\model\Sensor.java
 X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\resource\DiscoveryResource.java
 X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\resource\RoomResource.java
+X:\UNI\ClientServerArch\smart-campus-api\src\main\java\com\smartcampus\resource\SensorResource.java
