@@ -1,9 +1,9 @@
 package com.smartcampus.resource;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,7 +13,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.Room;
 import com.smartcampus.model.Sensor;
 
 @Path("/sensors")
@@ -23,39 +26,35 @@ public class SensorResource {
 
     public static Map<String, Sensor> sensors = new HashMap<>();
 
-    // CREATE sensor
     @POST
-    public Sensor createSensor(Sensor sensor) {
+    public Response createSensor(Sensor sensor) {
+        Room room = SensorRoomResource.rooms.get(sensor.getRoomId());
 
-        // VALIDATION: check room exists
-        if (!RoomResource.rooms.containsKey(sensor.roomId)) {
-            throw new RuntimeException("Room does not exist");
+        if (room == null) {
+            throw new LinkedResourceNotFoundException("Room does not exist");
         }
 
-        sensors.put(sensor.id, sensor);
+        sensors.put(sensor.getId(), sensor);
+        room.getSensorIds().add(sensor.getId());
 
-        // LINK sensor to room
-        RoomResource.rooms.get(sensor.roomId).sensorIds.add(sensor.id);
-
-        return sensor;
+        return Response.status(Response.Status.CREATED).entity(sensor).build();
     }
 
-    // GET sensors (with optional filter)
     @GET
-    public Collection<Sensor> getSensors(@QueryParam("type") String type) {
+    public List<Sensor> getSensors(@QueryParam("type") String type) {
+        List<Sensor> result = new ArrayList<>();
 
-        if (type == null) {
-            return sensors.values();
+        for (Sensor sensor : sensors.values()) {
+            if (type == null || sensor.getType().equalsIgnoreCase(type)) {
+                result.add(sensor);
+            }
         }
 
-        return sensors.values().stream()
-                .filter(s -> s.type.equalsIgnoreCase(type))
-                .collect(Collectors.toList());
+        return result;
     }
 
-    @Path("/{id}/readings")
-    public SensorReadingResource getReadingResource(@PathParam("id") String id) {
-        return new SensorReadingResource(id);
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getSensorReadingResource(@PathParam("sensorId") String sensorId) {
+        return new SensorReadingResource(sensorId);
     }
-
 }

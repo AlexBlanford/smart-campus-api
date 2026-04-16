@@ -8,16 +8,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/")
+@Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiscoveryResource {
 
     @GET
-    public Map<String, Object> getInfo() {
-        Map<String, Object> info = new HashMap<>();
-        info.put("version", "v1");
-        info.put("rooms", "/api/v1/rooms");
-        info.put("sensors", "/api/v1/sensors");
-        return info;
+    public Map<String, Object> getDiscovery() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("version", "v1");
+        response.put("adminContact", "smartcampus-admin@westminster.ac.uk");
+
+        Map<String, String> resources = new HashMap<>();
+        resources.put("rooms", "/api/v1/rooms");
+        resources.put("sensors", "/api/v1/sensors");
+
+        response.put("resources", resources);
+        return response;
     }
 }

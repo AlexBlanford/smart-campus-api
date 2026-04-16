@@ -7,10 +7,13 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import com.smartcampus.exception.SensorUnavailableException;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
 
@@ -18,34 +21,40 @@ import com.smartcampus.model.SensorReading;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {
 
-    private String sensorId;
-
-    // store readings per sensor
     public static Map<String, List<SensorReading>> readings = new HashMap<>();
+
+    private final String sensorId;
 
     public SensorReadingResource(String sensorId) {
         this.sensorId = sensorId;
     }
 
-    // GET readings
     @GET
     public List<SensorReading> getReadings() {
+        if (!SensorResource.sensors.containsKey(sensorId)) {
+            throw new NotFoundException("Sensor not found");
+        }
+
         return readings.getOrDefault(sensorId, new ArrayList<>());
     }
 
-    // POST new reading
     @POST
-    public SensorReading addReading(SensorReading reading) {
+    public Response addReading(SensorReading reading) {
+        Sensor sensor = SensorResource.sensors.get(sensorId);
+
+        if (sensor == null) {
+            throw new NotFoundException("Sensor not found");
+        }
+
+        if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
+            throw new SensorUnavailableException("Sensor under maintenance");
+        }
 
         readings.putIfAbsent(sensorId, new ArrayList<>());
         readings.get(sensorId).add(reading);
 
-        // update sensor current value
-        Sensor sensor = SensorResource.sensors.get(sensorId);
-        if (sensor != null) {
-            sensor.currentValue = reading.value;
-        }
+        sensor.setCurrentValue(reading.getValue());
 
-        return reading;
+        return Response.status(Response.Status.CREATED).entity(reading).build();
     }
 }
